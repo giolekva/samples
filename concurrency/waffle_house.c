@@ -77,7 +77,7 @@ void InitSemaphores() {
     sprintf(sem_path, READY_FOR_CLIENT, i);
     cashier_line.ready_for_client[i] = sem_open(sem_path, O_CREAT, /*mode=*/0644,
 						/*value=*/0);
-    assert(cashier_line.ready_for_client[i] != NULL);
+    assert(cashier_line.ready_for_client[i] != SEM_FAILED);
     sem_unlink(sem_path);
   }
 #else
@@ -133,7 +133,7 @@ void DestroySemaphores() {
     sem_destroy(cashier_line.ready_for_client[i]);
     free(cashier_line.ready_for_client[i]);
   }
-#endif  // TODO(giolekva): check free
+#endif
   printf("Semaphores destroyed.\n");
 }
 
@@ -212,7 +212,6 @@ void* Client(void* arg) {
   }
   for (int i = 0; i < num_waffles; ++i) {
     if (sem_wait(waffle_approved) == -1) {
-      printf("--------- %d\n", errno);
       assert(errno == EINTR);
       continue;
     }
@@ -220,7 +219,6 @@ void* Client(void* arg) {
   }
   printf("CLIENT %d: all waffles received, ready to pay.\n", id);
   while (sem_wait(cashier_line.lock) == -1) {
-    printf("+++++++ %d\n", errno);
     assert(errno == EINTR);
     continue;
   }
@@ -231,7 +229,6 @@ void* Client(void* arg) {
   sem_post(cashier_line.client_wants_to_pay);
   printf("CLIENT %d: notified cashier.\n", id);
   while (sem_wait(cashier_line.ready_for_client[id]) == -1) {
-    printf("####### errno");
     assert(errno == EINTR);
     continue;
   }
