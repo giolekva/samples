@@ -213,6 +213,7 @@ void* Client(void* arg) {
   for (int i = 0; i < num_waffles; ++i) {
     if (sem_wait(waffle_approved) == -1) {
       assert(errno == EINTR);
+      --i;
       continue;
     }
     printf("CLIENT %d: received new waffle.\n", id);
@@ -228,7 +229,7 @@ void* Client(void* arg) {
   printf("CLIENT %d: got cashier line number %d.\n", id, line_number);
   sem_post(cashier_line.client_wants_to_pay);
   printf("CLIENT %d: notified cashier.\n", id);
-  while (sem_wait(cashier_line.ready_for_client[id]) == -1) {
+  while (sem_wait(cashier_line.ready_for_client[line_number]) == -1) {
     assert(errno == EINTR);
     continue;
   }
