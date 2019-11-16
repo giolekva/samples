@@ -286,7 +286,6 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < NUM_CLIENTS; ++i) {
     while (sem_wait(clients.done) == -1) {
       assert(errno == EINTR);
-      --i;
       continue;
     }
   }
