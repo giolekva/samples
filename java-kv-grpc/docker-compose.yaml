@@ -1,0 +1,22 @@
+version: "3.2"
+
+networks:
+  net:
+
+services:
+  server:
+    build: server
+    image: "kw-server:latest"
+    environment:
+      PORT: 1234
+    networks: 
+      - net
+  client:
+    build: client  
+    image: "kw-client:latest"
+    environment:
+      SERVER_ADDRESS: "server:1234"
+    depends_on:      
+      - "server"
+    networks: 
+      - net
