@@ -1,0 +1,11 @@
+FROM node:alpine
+
+RUN npm install \
+    webpack \
+    webpack-cli \
+    google-protobuf
+RUN npm install grpc-web
+
+WORKDIR /app
+
+CMD sh compile_js.sh
